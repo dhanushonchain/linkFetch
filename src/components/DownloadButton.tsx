@@ -13,7 +13,7 @@ export function DownloadButton({ disabled, loading, label, onClick }: DownloadBu
       onClick={onClick}
       disabled={disabled}
       aria-busy={loading}
-      className="w-full rounded-[10px] bg-accent px-4 py-2.5 text-[13px] font-medium text-[#0b0b0b] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-surface disabled:text-muted disabled:opacity-100"
+      className="w-full rounded-[10px] bg-accent px-4 py-2.5 text-[13px] font-medium text-[#171717] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-surface disabled:text-muted disabled:opacity-100"
     >
       {loading ? (
         <span className="flex items-center justify-center gap-2">

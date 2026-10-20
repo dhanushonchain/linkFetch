@@ -6,8 +6,8 @@
   --color-border: #303030;
   --color-ink: #f2f2f2;
   --color-muted: #777777;
-  --color-accent: #4c8dff;
-  --color-accent-soft: #1d2c4a;
+  --color-accent: #3b82f6;
+  --color-accent-soft: #172554;
 
   --font-sans:
     -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica,
@@ -16,36 +16,39 @@
     ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 }
 
-html,
-body,
-#root {
-  height: 100%;
-}
+/* Kept inside the base layer so Tailwind utilities can override it. */
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
 
-body {
-  background-color: var(--color-bg);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  overflow: hidden;
-}
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
 
-/* Quiet, native feeling inputs. */
-textarea,
-select,
-button {
-  font-family: inherit;
-  font-size: inherit;
-  color: inherit;
-}
+  /* Quiet, native feeling inputs. */
+  textarea,
+  select,
+  button {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+  }
 
-textarea:focus-visible,
-select:focus-visible,
-button:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
+  textarea:focus-visible,
+  select:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
 
-::selection {
-  background: var(--color-accent-soft);
+  ::selection {
+    background: var(--color-accent-soft);
+  }
 }

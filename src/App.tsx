@@ -218,13 +218,18 @@ export default function App() {
       ) : null}
 
       <footer className="mt-auto flex items-center justify-between gap-3 border-t border-border pt-2 text-[11px] text-muted">
-        <span className="truncate">
+        <button
+          type="button"
+          onClick={chooseDestination}
+          disabled={running}
+          className="shrink-0 rounded-[8px] bg-accent px-2.5 py-1 font-medium text-[#171717] transition-opacity hover:opacity-90 disabled:opacity-50"
+        >
+          Change
+        </button>
+        <span className="truncate text-right">
           {host ? `${host} · ` : ""}
           {destination ?? "Downloads"}
         </span>
-        <button type="button" onClick={chooseDestination} disabled={running} className="shrink-0 hover:text-ink disabled:opacity-50">
-          Change…
-        </button>
       </footer>
     </main>
   );

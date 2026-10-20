@@ -69,7 +69,10 @@ pub async fn yt_dlp_version() -> Option<String> {
     Some(String::from_utf8_lossy(&output.stdout).trim().to_string())
 }
 
-/// Run yt-dlp for a video or an audio track.
+/// Run yt-dlp for the requested target.
+///
+/// `Video + Audio` runs two passes so the user ends up with the video file and
+/// an extracted MP3 of the same track.
 pub async fn download(
     url: &Url,
     target: crate::models::Target,
@@ -79,48 +82,91 @@ pub async fn download(
     ctx.ensure_allowed(url)?;
     let bin = yt_dlp_path().ok_or(AppError::MissingYtDlp)?;
     let ffmpeg = ffmpeg_path();
-    let want_audio = target == crate::models::Target::Audio;
 
+    let want_audio = matches!(
+        target,
+        crate::models::Target::Audio | crate::models::Target::VideoAudio
+    );
     if want_audio && ffmpeg.is_none() {
         return Err(AppError::MissingFfmpeg);
     }
 
-    let template = format!("{}/%(title).80B [%(id)s].%(ext)s", ctx.dest.display());
-    let mut args: Vec<String> = vec![
-        "--no-playlist".into(),
-        "--no-warnings".into(),
-        "--newline".into(),
-        "--no-simulate".into(),
-        "--progress".into(),
-        "--progress-template".into(),
-        "dl|%(progress.status)s|%(progress.downloaded_bytes)s|%(progress.total_bytes)s|%(progress.total_bytes_estimate)s".into(),
-        "--print".into(),
-        "after_move:filepath".into(),
-        "-o".into(),
-        template,
-    ];
-    if want_audio {
-        args.extend([
-            "-x".into(),
-            "--audio-format".into(),
-            "mp3".into(),
-            "--audio-quality".into(),
-            "0".into(),
-        ]);
-    } else if ffmpeg.is_some() {
-        args.extend([
-            "-f".into(),
-            "bv*+ba/b".into(),
-            "--merge-output-format".into(),
-            "mp4".into(),
-        ]);
-    } else {
-        // Without FFmpeg we can only take a single pre-muxed stream.
-        args.extend(["-f".into(), "best".into()]);
-    }
-    args.push(url.to_string());
+    let base_args = |audio: bool| -> Vec<String> {
+        let mut args: Vec<String> = vec![
+            "--no-playlist".into(),
+            "--no-warnings".into(),
+            "--newline".into(),
+            "--no-simulate".into(),
+            "--progress".into(),
+            "--progress-template".into(),
+            "dl|%(progress.status)s|%(progress.downloaded_bytes)s|%(progress.total_bytes)s|%(progress.total_bytes_estimate)s".into(),
+            "--print".into(),
+            "after_move:filepath".into(),
+            "-o".into(),
+            // The audio pass needs its own name, otherwise its temporary
+            // download overwrites the video file we just produced.
+            if audio {
+                format!("{}/%(title).80B [%(id)s] (audio).%(ext)s", ctx.dest.display())
+            } else {
+                format!("{}/%(title).80B [%(id)s].%(ext)s", ctx.dest.display())
+            },
+        ];
+        if audio {
+            args.extend([
+                "-x".into(),
+                "--audio-format".into(),
+                "mp3".into(),
+                "--audio-quality".into(),
+                "0".into(),
+            ]);
+        } else if ffmpeg.is_some() {
+            args.extend([
+                "-f".into(),
+                "bv*+ba/b".into(),
+                "--merge-output-format".into(),
+                "mp4".into(),
+            ]);
+        } else {
+            // Without FFmpeg we can only take a single pre-muxed stream.
+            args.extend(["-f".into(), "best".into()]);
+        }
+        args.push(url.to_string());
+        args
+    };
 
-    let mut child = Command::new(&bin)
+    let passes: Vec<bool> = match target {
+        crate::models::Target::Audio => vec![true],
+        crate::models::Target::VideoAudio => vec![false, true],
+        _ => vec![false],
+    };
+
+    let mut files = Vec::new();
+    for audio in passes {
+        let path = run(&bin, base_args(audio), ctx, report, audio).await?;
+        let name = path
+            .file_name()
+            .map(|n| n.to_string_lossy().to_string())
+            .unwrap_or_else(|| sanitize_stem(&path.to_string_lossy()));
+        let size = tokio::fs::metadata(&path).await.ok().map(|m| m.len());
+        files.push(FileInfo {
+            path: path.to_string_lossy().to_string(),
+            name,
+            size,
+        });
+    }
+
+    Ok(files)
+}
+
+/// One yt-dlp run. Returns the file it produced.
+async fn run(
+    bin: &Path,
+    args: Vec<String>,
+    ctx: &Ctx,
+    report: Report<'_>,
+    audio: bool,
+) -> AppResult<PathBuf> {
+    let mut child = Command::new(bin)
         .args(&args)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -168,7 +214,7 @@ pub async fn download(
 
     if !status.success() {
         let err = stderr_buf.lock().unwrap().clone();
-        return Err(map_ytdlp_error(&err, want_audio));
+        return Err(map_ytdlp_error(&err, audio));
     }
 
     let path = output_path
@@ -181,17 +227,7 @@ pub async fn download(
         ));
     }
 
-    let name = path
-        .file_name()
-        .map(|n| n.to_string_lossy().to_string())
-        .unwrap_or_else(|| sanitize_stem(&path.to_string_lossy()));
-    let size = tokio::fs::metadata(&path).await.ok().map(|m| m.len());
-
-    Ok(vec![FileInfo {
-        path: path.to_string_lossy().to_string(),
-        name,
-        size,
-    }])
+    Ok(path)
 }
 
 /// Interpret a yt-dlp progress line (`dl|status|downloaded|total|estimate`).

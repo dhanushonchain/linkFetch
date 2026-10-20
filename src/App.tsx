@@ -9,7 +9,7 @@ import * as api from "./lib/tauri";
 import type { FileInfo } from "./lib/tauri";
 import { hostOf, parseLinks, type Target } from "./lib/validation";
 
-const NEEDS_YT_DLP: Target[] = ["video", "audio"];
+const NEEDS_YT_DLP: Target[] = ["video", "audio", "video_audio"];
 
 function errorMessage(error: unknown): string {
   if (typeof error === "string") return error;
@@ -116,7 +116,7 @@ export default function App() {
 
   const running = phase === "running";
   const missingTool =
-    target === "audio"
+    target === "audio" || target === "video_audio"
       ? !dependencies?.ffmpeg
         ? "FFmpeg is not installed, so audio cannot be converted."
         : !dependencies?.yt_dlp

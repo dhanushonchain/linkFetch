@@ -6,6 +6,9 @@ use serde::{Deserialize, Serialize};
 pub enum Target {
     Video,
     Audio,
+    /// Video track and extracted audio track at the same time.
+    #[serde(rename = "video_audio")]
+    VideoAudio,
     Image,
     Gif,
     Text,
@@ -16,6 +19,7 @@ impl Target {
         match self {
             Target::Video => "Video",
             Target::Audio => "Audio",
+            Target::VideoAudio => "Video + Audio",
             Target::Image => "Image",
             Target::Gif => "GIF",
             Target::Text => "Text",
@@ -82,4 +86,26 @@ pub struct Dependencies {
     pub yt_dlp: Option<String>,
     pub yt_dlp_version: Option<String>,
     pub ffmpeg: Option<String>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Target;
+
+    /// The frontend sends these exact strings.
+    #[test]
+    fn deserializes_frontend_values() {
+        let cases = [
+            ("video", Target::Video),
+            ("audio", Target::Audio),
+            ("video_audio", Target::VideoAudio),
+            ("image", Target::Image),
+            ("gif", Target::Gif),
+            ("text", Target::Text),
+        ];
+        for (value, expected) in cases {
+            let parsed: Target = serde_json::from_str(&format!("\"{value}\"")).unwrap();
+            assert_eq!(parsed, expected);
+        }
+    }
 }

@@ -73,6 +73,30 @@ async fn live_ytdlp_video() {
 
 #[tokio::test]
 #[ignore = "needs network"]
+async fn live_ytdlp_video_and_audio() {
+    let dir = tempfile::tempdir().unwrap();
+    let url = url::Url::parse("https://download.samplelib.com/mp4/sample-5s.mp4").unwrap();
+    let files = ytdlp::download(
+        &url,
+        Target::VideoAudio,
+        &ctx(dir.path().to_path_buf()),
+        &|_, _, _| {},
+    )
+    .await
+    .unwrap();
+    println!("video+audio -> {:?}", files);
+    assert_eq!(files.len(), 2);
+    assert!(files[0].name.ends_with(".mp4"));
+    assert!(files[1].name.ends_with(".mp3"));
+    // Both files must still exist: the audio pass must not overwrite the video.
+    for file in &files {
+        let on_disk = std::fs::metadata(&file.path).unwrap();
+        assert_eq!(on_disk.len(), file.size.unwrap());
+    }
+}
+
+#[tokio::test]
+#[ignore = "needs network"]
 async fn live_ytdlp_audio() {
     let dir = tempfile::tempdir().unwrap();
     let url = url::Url::parse("https://download.samplelib.com/mp4/sample-5s.mp4").unwrap();

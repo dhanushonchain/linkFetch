@@ -79,6 +79,30 @@ describe("linkFetch", () => {
     });
   });
 
+  it("remembers the last used target between launches", () => {
+    localStorage.setItem("linkfetch.target", "video_audio");
+    render(<App />);
+
+    expect(screen.getByLabelText("Target")).toHaveValue("video_audio");
+  });
+
+  it("offers a combined video and audio target", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    expect(screen.getByRole("option", { name: "Video + Audio" })).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("Link"), "https://example.com/watch");
+    await user.selectOptions(screen.getByLabelText("Target"), "video_audio");
+    await user.click(screen.getByRole("button", { name: "Download" }));
+
+    await waitFor(() => expect(startArgs()).toBeDefined());
+    expect(startArgs()?.[1]).toMatchObject({
+      urls: ["https://example.com/watch"],
+      target: "video_audio",
+    });
+  });
+
   it("shows a loading state while the job runs and prevents a second submit", async () => {
     const user = userEvent.setup();
     render(<App />);

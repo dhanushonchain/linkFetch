@@ -1,8 +1,9 @@
-export type Target = "video" | "audio" | "image" | "gif" | "text";
+export type Target = "video" | "audio" | "video_audio" | "image" | "gif" | "text";
 
 export const TARGETS: { value: Target; label: string }[] = [
   { value: "video", label: "Video" },
   { value: "audio", label: "Audio" },
+  { value: "video_audio", label: "Video + Audio" },
   { value: "image", label: "Image" },
   { value: "gif", label: "GIF" },
   { value: "text", label: "Text" },

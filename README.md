@@ -16,11 +16,15 @@ lands in your Downloads folder.
 | -------- | --------------------------------------------------------------------------- |
 | `Video`  | The video is downloaded with `yt-dlp` (best video + audio, merged to MP4).    |
 | `Audio`  | The audio is extracted with `yt-dlp` and converted to MP3 (needs FFmpeg).    |
+| `Video + Audio` | Two files: the merged MP4 video **and** the extracted MP3 track.       |
 | `Image`  | The image file is fetched directly and written to disk.                       |
 | `GIF`    | The GIF is fetched directly and written to disk.                              |
 | `Text`   | The page is fetched and its readable article text is saved as a `.txt` file.  |
 
 * One or many links — one per line. They are processed sequentially.
+* `Video + Audio` downloads the track twice (once as MP4, once as MP3), so it
+  needs FFmpeg and takes roughly twice as long as `Video`. The extracted track
+  gets an `(audio)` suffix in its file name.
 * The last used target is remembered between launches.
 * Completed files can be revealed in Finder or opened with the default app.
 * Files are saved to `~/Downloads` unless you pick another folder.
@@ -30,7 +34,7 @@ lands in your Downloads folder.
 * **Direct media** (`Image`, `GIF`): any `http(s)` URL that serves the media
   file itself. The response `Content-Type` is checked, so a link to an HTML
   page is rejected instead of silently saving a web page.
-* **Video / Audio**: any URL that `yt-dlp` supports (YouTube, Vimeo, SoundCloud,
+* **Video / Audio / Video + Audio**: any URL that `yt-dlp` supports (YouTube, Vimeo, SoundCloud,
   Twitter/X, Reddit, TikTok, and many more — see the
   [yt-dlp supported sites](https://github.com/yt-dlp/yt-dlp#supported-sites)
   list). Direct media URLs work as well.

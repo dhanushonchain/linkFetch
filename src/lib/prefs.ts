@@ -1,4 +1,4 @@
-import type { Target } from "./validation";
+import { TARGETS, type Target } from "./validation";
 
 const TARGET_KEY = "linkfetch.target";
 const DESTINATION_KEY = "linkfetch.destination";
@@ -6,10 +6,8 @@ const DESTINATION_KEY = "linkfetch.destination";
 /** Remember the last used target and destination folder locally. */
 export function loadTarget(): Target {
   const value = localStorage.getItem(TARGET_KEY);
-  if (value === "video" || value === "audio" || value === "image" || value === "gif" || value === "text") {
-    return value;
-  }
-  return "video";
+  const match = TARGETS.find((target) => target.value === value);
+  return match ? match.value : "video";
 }
 
 export function saveTarget(target: Target): void {

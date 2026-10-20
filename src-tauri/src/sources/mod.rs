@@ -127,7 +127,7 @@ pub fn route(url: &Url, target: Target) -> AppResult<Plan> {
     let site = known_site(&host);
 
     match target {
-        Target::Video | Target::Audio => Ok(Plan::YtDlp {
+        Target::Video | Target::Audio | Target::VideoAudio => Ok(Plan::YtDlp {
             url: url.clone(),
             target,
         }),
@@ -170,7 +170,12 @@ pub fn describe(url: &Url, target: Target) -> SourceInfo {
     let host = url.host_str().unwrap_or_default().to_ascii_lowercase();
     let site = known_site(&host);
 
-    let mut supported = vec![Target::Video, Target::Audio, Target::Text];
+    let mut supported = vec![
+        Target::Video,
+        Target::Audio,
+        Target::VideoAudio,
+        Target::Text,
+    ];
     let direct_media_ok = site.is_none_or(|s| !s.no_direct_media);
     if direct_media_ok {
         supported.push(Target::Image);
@@ -228,6 +233,12 @@ mod tests {
     fn rejects_image_for_social_sites() {
         let err = route(&url("https://instagram.com/p/x"), Target::Image).unwrap_err();
         assert_eq!(err.code(), "unsupported_target");
+    }
+
+    #[test]
+    fn routes_video_audio_to_ytdlp() {
+        let plan = route(&url("https://youtu.be/abc"), Target::VideoAudio).unwrap();
+        assert!(matches!(plan, Plan::YtDlp { .. }));
     }
 
     #[test]

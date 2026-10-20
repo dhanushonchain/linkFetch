@@ -135,9 +135,30 @@ describe("linkFetch", () => {
       message: null,
     });
 
-    expect(await screen.findByText("a.png")).toBeInTheDocument();
+    expect(await screen.findByText("42% · a.png")).toBeInTheDocument();
     const bar = document.querySelector("div[style*='width']");
     expect(bar).toHaveStyle({ width: "42%" });
+  });
+
+  it("shows the queue position for a batch", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.type(screen.getByLabelText("Link"), "https://example.com/a.png");
+    await user.click(screen.getByRole("button", { name: "Download" }));
+
+    emit("linkfetch://progress", {
+      job_id: "job-1",
+      index: 1,
+      total: 3,
+      state: "downloading",
+      url: "https://example.com/b.png",
+      filename: "b.png",
+      percent: 10,
+      message: null,
+    });
+
+    expect(await screen.findByText("10% · 2/3 · b.png")).toBeInTheDocument();
   });
 
   it("shows an error and offers a retry", async () => {

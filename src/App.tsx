@@ -27,6 +27,7 @@ export default function App() {
   const [phase, setPhase] = useState<Phase | "idle">("idle");
   const [percent, setPercent] = useState<number | null>(null);
   const [detail, setDetail] = useState<string | null>(null);
+  const [position, setPosition] = useState<string | null>(null);
   const [files, setFiles] = useState<FileInfo[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [source, setSource] = useState<{ key: string; unsupported: string | null } | null>(null);
@@ -59,6 +60,7 @@ export default function App() {
         setPhase("running");
         setPercent(progress.percent);
         setDetail(progress.filename ?? null);
+        setPosition(progress.total > 1 ? `${progress.index + 1}/${progress.total}` : null);
       })
       .then((unlisten) => unlisteners.push(unlisten))
       .catch(() => undefined);
@@ -133,6 +135,7 @@ export default function App() {
     setPhase("running");
     setPercent(null);
     setDetail(null);
+    setPosition(null);
     setFiles([]);
     setError(null);
     try {
@@ -208,6 +211,7 @@ export default function App() {
           phase={phase}
           percent={percent}
           detail={statusDetail}
+          position={position}
           files={files}
           hasError={error !== null}
           onReveal={(path) => api.revealInFinder(path)}

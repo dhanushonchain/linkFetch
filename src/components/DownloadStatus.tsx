@@ -6,6 +6,8 @@ interface DownloadStatusProps {
   phase: Phase;
   percent: number | null;
   detail: string | null;
+  /** Position in the queue, e.g. "2/5". */
+  position: string | null;
   files: FileInfo[];
   hasError: boolean;
   onReveal: (path: string) => void;
@@ -19,6 +21,7 @@ export function DownloadStatus({
   phase,
   percent,
   detail,
+  position,
   files,
   hasError,
   onReveal,
@@ -40,7 +43,12 @@ export function DownloadStatus({
           )}
         </div>
         <div className="flex items-center justify-between gap-3 text-[11px] text-muted">
-          <span className="truncate">{detail ?? "Working..."}</span>
+          <span className="truncate">
+            {percent !== null ? `${Math.round(percent)}%` : null}
+            {percent !== null ? " \u00b7 " : null}
+            {position ? `${position} \u00b7 ` : null}
+            {detail ?? "Working..."}
+          </span>
           <button type="button" onClick={onCancel} className="shrink-0 hover:text-ink">
             Cancel
           </button>

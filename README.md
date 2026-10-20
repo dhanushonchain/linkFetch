@@ -6,7 +6,7 @@ A minimal native macOS utility for downloading or extracting content from a
 link. Paste a URL, pick what you want out of it, press Download. The file
 lands in your Downloads folder.
 
-![linkFetch](assets/icon.svg)
+<img src="assets/logo.png" width="160" alt="linkFetch logo">
 
 ---
 

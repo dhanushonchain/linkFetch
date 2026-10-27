@@ -14,15 +14,15 @@ lands in your Downloads folder.
 
 | Target   | What happens                                                                |
 | -------- | --------------------------------------------------------------------------- |
-| `Video`  | The video is downloaded with `yt-dlp` (best video + audio, merged to MP4).    |
+| `Video`  | The video is downloaded **video‑only** (no audio) with `yt‑dlp`.
 | `Audio`  | The audio is extracted with `yt-dlp` and converted to MP3 (needs FFmpeg).    |
-| `Video + Audio` | Two files: the merged MP4 video **and** the extracted MP3 track.       |
+| `Video + Audio` | A single merged MP4 containing both video and audio (no separate MP3).
 | `Image`  | The image file is fetched directly and written to disk.                       |
 | `GIF`    | The GIF is fetched directly and written to disk.                              |
 | `Text`   | The page is fetched and its readable article text is saved as a `.txt` file.  |
 
 * One or many links — one per line. They are processed sequentially.
-* `Video + Audio` downloads the track twice (once as MP4, once as MP3), so it
+* `Video + Audio` produces a merged MP4 file (requires FFmpeg).
   needs FFmpeg and takes roughly twice as long as `Video`. The extracted track
   gets an `(audio)` suffix in its file name.
 * The last used target is remembered between launches.

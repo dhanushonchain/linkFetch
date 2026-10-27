@@ -40,7 +40,7 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "extraResources": ["ffmpeg"],
+    "resources": ["ffmpeg"],
     "macOS": {
       "minimumSystemVersion": "11.0"
     },

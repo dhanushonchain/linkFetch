@@ -1,0 +1,4 @@
+#!/bin/sh
+# Placeholder ffmpeg binary for bundling.
+# In a real build, replace this with a static ffmpeg build for macOS.
+exec ffmpeg "$@"

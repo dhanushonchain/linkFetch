@@ -103,8 +103,7 @@ pub async fn download(
             "--print".into(),
             "after_move:filepath".into(),
             "-o".into(),
-            // The audio pass needs its own name, otherwise its temporary
-            // download overwrites the video file we just produced.
+            // Output template – audio pass needs a distinct name.
             if audio {
                 format!("{}/%(title).80B [%(id)s] (audio).%(ext)s", ctx.dest.display())
             } else {
@@ -112,6 +111,7 @@ pub async fn download(
             },
         ];
         if audio {
+            // Audio-only extraction.
             args.extend([
                 "-x".into(),
                 "--audio-format".into(),
@@ -119,7 +119,11 @@ pub async fn download(
                 "--audio-quality".into(),
                 "0".into(),
             ]);
+        } else if target == crate::models::Target::Video {
+            // Video-only download (no audio).
+            args.extend(["-f".into(), "bestvideo".into()]);
         } else if ffmpeg.is_some() {
+            // Merged video+audio (default for VideoAudio).
             args.extend([
                 "-f".into(),
                 "bv*+ba/b".into(),
@@ -127,16 +131,21 @@ pub async fn download(
                 "mp4".into(),
             ]);
         } else {
-            // Without FFmpeg we can only take a single pre-muxed stream.
+            // Fallback without FFmpeg – best pre-muxed stream.
             args.extend(["-f".into(), "best".into()]);
         }
         args.push(url.to_string());
         args
     };
 
+    // Determine which yt‑dlp passes to run.
+    // * Audio → one audio‑only pass.
+    // * Video → one video‑only pass (no audio).
+    // * VideoAudio → one merged video+audio pass (no separate audio file).
     let passes: Vec<bool> = match target {
         crate::models::Target::Audio => vec![true],
-        crate::models::Target::VideoAudio => vec![false, true],
+        crate::models::Target::VideoAudio => vec![false],
+        crate::models::Target::Video => vec![false],
         _ => vec![false],
     };
 

@@ -29,7 +29,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["app", "dmg"],
+    "targets": "all",
     "category": "Utility",
     "shortDescription": "Paste. Choose. Fetch.",
     "longDescription": "A minimal native macOS link downloader.",

@@ -1,6 +1,6 @@
 [package]
 name = "linkfetch"
-version = "0.1.0"
+version = "0.1.2"
 description = "Minimal native macOS link downloader"
 authors = ["linkFetch"]
 license = "MIT"
